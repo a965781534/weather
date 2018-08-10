@@ -97,6 +97,7 @@ Page({
   onTapLocation(){
     wx.getLocation({
       success: res => {
+        
         this.qqmapsdk.reverseGeocoder({
           location: {
             latitude: res.latitude,
