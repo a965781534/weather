@@ -14,26 +14,27 @@ const weatherColorMap = {
   'heavyrain': '#c5ccd0',
   'snow': '#aae1fc'
 }
-var QQMapWX = require('../../libs/qqmap-wx-jssdk.js');
+const QQMapWX = require('../../libs/qqmap-wx-jssdk.js')
+
 Page({
   data: {
-    'nowTemp': '',
-    'nowWeather': '',
-    'nowWeatherBg': '',
-    'hourlyWeather': [],
-    'todayDate': '',
-    'todayTemp': ''
-  },
-  onPullDownRefresh(){
-    this.getNow(() => {
-      wx.stopPullDownRefresh()
-    })
+    nowTemp: '',
+    nowWeather: '',
+    nowWeatherBg: '',
+    hourlyWeather: [],
+    todayDate: '',
+    todayTemp: ''
   },
   onLoad(){
     this.qqmapsdk = new QQMapWX({
       key: '42TBZ-GTPW6-NHFS7-MOD2F-MDZFJ-HNBPP'
     })
     this.getNow()
+  },
+  onPullDownRefresh(){
+    this.getNow(() => {
+      wx.stopPullDownRefresh()
+    })
   },
   getNow(callback){
     wx.request({
@@ -102,10 +103,8 @@ Page({
             longitude: res.longitude
           },
           success: res => {
-            console.log(222)
-            var city = res.result.address_component.city 
+            let city = res.result.address_component.city 
             console.log(city)
-            console.log(111)
           }
         })
       },
