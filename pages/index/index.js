@@ -16,6 +16,10 @@ const weatherColorMap = {
 }
 const QQMapWX = require('../../libs/qqmap-wx-jssdk.js')
 
+const UNPROMPTED = 0
+const UNAUTHORIZED = 1
+const AUTHORIZED = 2
+
 Page({
   data: {
     nowTemp: '',
@@ -23,11 +27,25 @@ Page({
     nowWeatherBg: '',
     hourlyWeather: [],
     todayDate: '',
-    todayTemp: ''
+    todayTemp: '',
+    city: '广州市',
+    locationAuthType: UNPROMPTED
   },
   onLoad(){
     this.qqmapsdk = new QQMapWX({
       key: '42TBZ-GTPW6-NHFS7-MOD2F-MDZFJ-HNBPP'
+    })
+    wx.getSetting({
+      success: res => {
+        var auth = res.authSetting['scope.userLocation']
+        this.setData({
+          locationAuthType: auth ? AUTHORIZED : (auth === false) ? UNAUTHORIZED : UNPROMPTED
+        })
+        if(auth)
+          this.getCityAndWeather()
+        else
+          this.getNow()
+      }
     })
     this.getNow()
   },
@@ -40,7 +58,7 @@ Page({
     wx.request({
       url: 'https://test-miniprogram.com/api/weather/now',
       data: {
-        city: '广州市'
+        city: this.data.city
       },
       success: res => {
         var result = res.data.result
@@ -91,25 +109,49 @@ Page({
   },
   onTapDayWeather(){
     wx.navigateTo({
-      url: '/pages/list/list',
+      url: '/pages/list/list?city=' + this.data.city,
     })
   },
   onTapLocation(){
+    if (this.data.locationAuthType === UNAUTHORIZED)
+      wx.openSetting({
+        success: res => {
+          var auth = res.authSetting['scope.userLocation']
+          if(auth) {
+            this.getCityAndWeather()
+          }
+        }
+      })
+    else
+      this.getCityAndWeather()
+  },
+  getCityAndWeather(){
     wx.getLocation({
       success: res => {
-        
+        this.setData({
+          locationAuthType: AUTHORIZED
+        })
         this.qqmapsdk.reverseGeocoder({
           location: {
             latitude: res.latitude,
             longitude: res.longitude
           },
           success: res => {
-            let city = res.result.address_component.city 
-            console.log(city)
+            var city = res.result.address_component.city
+            this.setData({
+              city: city,
+              locationTipsText: ''
+            })
+            this.getNow()
           }
         })
       },
+      fail: () => {
+        this.setData({
+          locationAuthType: UNAUTHORIZED
+        })
+      }
     })
-  }
-
+  } 
+    
 })

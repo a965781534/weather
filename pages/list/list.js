@@ -2,9 +2,13 @@
 const dayMap = ['星期日', '星期一', '星期二', '星期三', '星期四', '星期五', '星期六']
 Page({
   data: {
-    weekWeather: [1, 2, 3, 4, 5, 6, 7]
+    weekWeather: [1, 2, 3, 4, 5, 6, 7],
+    city: '广州市'
   },
-  onLoad() {
+  onLoad(options) {
+    this.setData({
+      city: options.city
+    })
     this.getWeekWeather()
   },
   onPullDownRefresh(){
@@ -16,7 +20,7 @@ Page({
     wx.request({
       url: 'https://test-miniprogram.com/api/weather/future',
       data: {
-        city: '广州市',
+        city: this.data.city,
         time: new Date().getTime()
       },
       success: res => {
